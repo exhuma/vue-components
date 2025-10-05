@@ -1,11 +1,11 @@
 <template>
   <v-dialog v-model="isVisible" width="500">
-    <template #activator="{ on, attrs }">
-      <slot name="button" :on="on" :attrs="attrs">Default</slot>
+    <template #activator="{ props }">
+      <slot name="button" v-bind="props">Default</slot>
     </template>
 
     <v-card>
-      <v-card-title class="text-h5 error lighten-2">
+      <v-card-title class="text-h5 bg-error">
         {{ title ?? "Confirm" }}
       </v-card-title>
 
@@ -17,10 +17,10 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="isVisible = false">{{
+        <v-btn color="primary" variant="text" @click="isVisible = false">{{
           rejectLabel ?? "Reject"
         }}</v-btn>
-        <v-btn color="primary" @click="onConfirmClicked">{{
+        <v-btn color="primary" variant="elevated" @click="onConfirmClicked">{{
           confirmLabel ?? "Confirm"
         }}</v-btn>
       </v-card-actions>
