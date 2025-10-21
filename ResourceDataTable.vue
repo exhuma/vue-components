@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends { id: string }">
+<script setup lang="ts" generic="T extends object">
 import type { QueryArguments, QueryResult } from "@/repository/types";
 import type { ReadonlyHeaders } from "@/types/vuetify";
 import { ref, watch } from "vue";
@@ -12,6 +12,7 @@ const props = defineProps<{
   headers: ReadonlyHeaders;
   title: string;
   icon: string;
+  itemValue?: string;
 }>();
 
 const serverItems = ref<T[]>([]);
@@ -79,7 +80,7 @@ defineExpose<ResourceDataTableAPI>({
     :search="search"
     :items-length="totalItems"
     :loading="loading"
-    item-value="id"
+    :item-value="itemValue || 'id'"
     @update:options="loadItems"
   >
     <template v-slot:top>
