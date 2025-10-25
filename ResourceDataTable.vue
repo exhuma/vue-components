@@ -1,8 +1,10 @@
 <script setup lang="ts" generic="T extends object">
-import type { QueryArguments, QueryResult } from "@/repository/types";
-import type { ReadonlyHeaders } from "@/types/vuetify";
+import type { DataTableSortItem } from "vuetify";
+import type { QueryArguments, QueryResult, SortByItem } from "./types/query";
+import type { ReadonlyHeaders } from "./types/vuetify";
 import { ref, watch } from "vue";
 import type { VDataTableServer } from "vuetify/components";
+import type {ResourceDataTableApi } from "./types/ResourceDataTable";
 
 const props = defineProps<{
   repository: {
@@ -21,7 +23,7 @@ const itemsPerPage = ref(10);
 const loading = ref(true);
 const search = ref("");
 
-const sortBy = ref<VDataTableServer["$props"]["sortBy"]>([]);
+const sortBy = ref<DataTableSortItem[]>([]);
 
 watch(
   sortBy,
@@ -42,7 +44,7 @@ function loadItems({
 }: {
   page: number;
   itemsPerPage: number;
-  sortBy: VDataTableServer["$props"]["sortBy"];
+  sortBy: SortByItem[];
 }): void {
   loading.value = true;
   props.repository
@@ -62,11 +64,22 @@ function reload() {
   });
 }
 
-interface ResourceDataTableAPI {
-  reload: () => void;
+function getTemplateItems(hdrs: ReadonlyHeaders): { slotName: string; slotRenderer: (item: T) => string; }[] {
+  const output: {slotName: string; slotRenderer: (item: T) => string;}[] = []
+  for (const header of hdrs ?? []) {
+    if (!header.key) {
+      continue;
+    }
+    const k = header.key;
+    output.push({
+      slotName: `item.${k}`,
+      slotRenderer: (item) => item[k as keyof T] as unknown as string,
+    });
+  }
+  return output
 }
 
-defineExpose<ResourceDataTableAPI>({
+defineExpose<ResourceDataTableApi>({
   reload,
 });
 </script>
@@ -100,11 +113,11 @@ defineExpose<ResourceDataTableAPI>({
     </template>
 
     <template
-      v-for="header in headers.filter((h) => h.key)"
-      v-slot:[`item.${header.key}`]="{ item }"
+      v-for="tpl in getTemplateItems(headers)"
+      v-slot:[`${tpl.slotName}`]="{ item }"
     >
-      <slot :name="`item.${header.key}`" :item="item">
-        {{ item[header.key as keyof T] }}
+      <slot :name="tpl.slotName" :item="item">
+        {{ tpl.slotRenderer(item) }}
       </slot>
     </template>
 
