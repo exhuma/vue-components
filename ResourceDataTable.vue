@@ -1,6 +1,10 @@
 <script setup lang="ts" generic="T extends object">
 import type { DataTableSortItem } from "vuetify";
-import type { QueryArguments, QueryResult, SortByItem } from "./types/query";
+import type {
+  PaginationArguments,
+  QueryResult,
+  SortByItem,
+} from "./types/query";
 import type { ReadonlyHeaders } from "./types/vuetify";
 import { ref, watch } from "vue";
 import type { VDataTableServer } from "vuetify/components";
@@ -8,7 +12,10 @@ import type {ResourceDataTableApi } from "./types/ResourceDataTable";
 
 const props = defineProps<{
   repository: {
-    query: (args: QueryArguments) => Promise<QueryResult<T>>;
+    query: (
+      query: { [key: string]: any },
+      pagination: PaginationArguments,
+    ) => Promise<QueryResult<T>>;
     remove: (id: string) => Promise<void>;
   };
   headers: ReadonlyHeaders;
@@ -48,7 +55,7 @@ function loadItems({
 }): void {
   loading.value = true;
   props.repository
-    .query({ page, itemsPerPage, sortBy })
+    .query({}, { page, itemsPerPage, sortBy })
     .then(({ items, total }) => {
       serverItems.value = items;
       totalItems.value = total;

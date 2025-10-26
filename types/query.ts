@@ -8,8 +8,13 @@ export type SortByItem = {
   order?: boolean | "asc" | "desc";
 };
 
-export type QueryArguments = {
+export type PaginationArguments = {
   page: number;
   itemsPerPage: number;
   sortBy: SortByItem[];
+};
+
+export type TimeWindow = {
+  start: string; // ISO date string
+  end: string; // ISO date string
 };
