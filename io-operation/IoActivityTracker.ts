@@ -1,5 +1,5 @@
 import { ref, computed } from "vue";
-import type { IoOperation, ActivityTracker } from "./IoOperation";
+import type { IoOperation } from "./IoOperation";
 
 interface TrackedJob {
   operation: IoOperation<any>;
@@ -14,7 +14,7 @@ interface TrackedJob {
  * This tracker maintains the progress state externally to keep IoOperation
  * framework-agnostic.
  */
-export class IoActivityTracker implements ActivityTracker {
+export class IoActivityTracker {
   private _jobs = ref(new Map<string, TrackedJob>());
   private _nextId = 0;
 
@@ -48,6 +48,7 @@ export class IoActivityTracker implements ActivityTracker {
     operation.promise.finally(() => {
       // Small delay to show completion state briefly
       setTimeout(() => {
+        console.log(`Auto-unregistering completed job ${id}`);
         this.unregister(operation);
       }, 500);
     });
@@ -103,6 +104,7 @@ export class IoActivityTracker implements ActivityTracker {
    * Check if any job has indeterminate progress
    */
   get hasIndeterminateJob(): boolean {
+    console.log(this.jobs);
     return this.jobs.some((job) => job.isIndeterminate);
   }
 
