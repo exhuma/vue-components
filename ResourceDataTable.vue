@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends object">
+<script setup lang="ts" generic="T extends object, E extends object">
 import type { DataTableSortItem } from "vuetify";
 import type {
   PaginationArguments,
@@ -8,7 +8,7 @@ import type {
 import type { ReadonlyHeaders } from "./types/vuetify";
 import { ref, watch } from "vue";
 import type { VDataTableServer } from "vuetify/components";
-import type {ResourceDataTableApi } from "./types/ResourceDataTable";
+import type { ResourceDataTableApi } from "./types/ResourceDataTable";
 
 const props = defineProps<{
   repository: {
@@ -18,6 +18,7 @@ const props = defineProps<{
     ) => Promise<QueryResult<T>>;
     remove: (id: string) => Promise<void>;
   };
+  enricher?: (item: T) => Promise<E>;
   headers: ReadonlyHeaders;
   title: string;
   icon: string;
@@ -56,6 +57,15 @@ function loadItems({
   loading.value = true;
   props.repository
     .query({}, { page, itemsPerPage, sortBy })
+    // @ts-expect-error The assigned type depends on whether an enricher is provided or not. This cannot be expressed well in TS.
+    .then(({ items, total }) => {
+      if (props.enricher) {
+        return Promise.all(items.map((item) => props.enricher!(item))).then(
+          (enrichedItems) => ({ items: enrichedItems, total }),
+        );
+      }
+      return { items, total };
+    })
     .then(({ items, total }) => {
       serverItems.value = items;
       totalItems.value = total;
@@ -71,8 +81,10 @@ function reload() {
   });
 }
 
-function getTemplateItems(hdrs: ReadonlyHeaders): { slotName: string; slotRenderer: (item: T) => string; }[] {
-  const output: {slotName: string; slotRenderer: (item: T) => string;}[] = []
+function getTemplateItems(
+  hdrs: ReadonlyHeaders,
+): { slotName: string; slotRenderer: (item: T) => string }[] {
+  const output: { slotName: string; slotRenderer: (item: T) => string }[] = [];
   for (const header of hdrs ?? []) {
     if (!header.key) {
       continue;
@@ -83,7 +95,7 @@ function getTemplateItems(hdrs: ReadonlyHeaders): { slotName: string; slotRender
       slotRenderer: (item) => item[k as keyof T] as unknown as string,
     });
   }
-  return output
+  return output;
 }
 
 defineExpose<ResourceDataTableApi>({
