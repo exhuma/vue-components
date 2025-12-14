@@ -11,27 +11,17 @@
         </v-card-title>
 
         <v-card-text class="pt-4">
-          <slot name="content">
-            Are you sure you want to proceed?
-          </slot>
+          <slot name="content"> Are you sure you want to proceed? </slot>
         </v-card-text>
 
         <v-divider></v-divider>
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            variant="text"
-            @click="onCancelClicked"
-          >
+          <v-btn color="primary" variant="text" @click="onCancelClicked">
             {{ rejectLabel }}
           </v-btn>
-          <v-btn
-            color="error"
-            variant="elevated"
-            @click="onConfirmClicked"
-          >
+          <v-btn color="error" variant="elevated" @click="onConfirmClicked">
             {{ confirmLabel }}
           </v-btn>
         </v-card-actions>
