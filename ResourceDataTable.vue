@@ -144,7 +144,7 @@ defineExpose<ResourceDataTableApi>({
       <v-btn
         prepend-icon="mdi-backup-restore"
         rounded="lg"
-        text="Reset data"
+        text="Reload"
         variant="text"
         border
         @click="reload"
