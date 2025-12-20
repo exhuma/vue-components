@@ -1,5 +1,9 @@
 <template>
-  <div :id="mapId" class="map-container" :style="{ height: height }"></div>
+  <div
+    id="map-container__map-id"
+    class="map-container"
+    :style="{ height: height }"
+  ></div>
 </template>
 
 <script setup lang="ts">
@@ -35,7 +39,6 @@ const emit = defineEmits<{
   (e: "update:coordinates", value: MapCoordinates): void;
 }>();
 
-const mapId = ref(`map-${crypto.randomUUID()}`);
 let map: L.Map | null = null;
 let marker: L.Marker | null = null;
 
@@ -48,7 +51,7 @@ onMounted(() => {
   const defaultLat = props.coordinates?.latitude || 51.505;
   const defaultLng = props.coordinates?.longitude || -0.09;
 
-  map = L.map(mapId.value, {
+  map = L.map("map-container__map-id", {
     dragging: isInteractive,
     touchZoom: isInteractive,
     scrollWheelZoom: isInteractive,
