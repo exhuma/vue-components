@@ -64,7 +64,6 @@ async function checkForUpdate(): Promise<boolean> {
     return false;
   }
 
-  // @ts-expect-error -- "env" is injected by Vite
   if (import.meta?.env?.DEV ?? false) {
     // Skip update checks in development mode
     return false;
