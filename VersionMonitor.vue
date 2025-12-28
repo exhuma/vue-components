@@ -24,7 +24,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
+
+interface Props {
+  appName?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  appName: () => {
+    // Fallback to build-time constant if prop not provided
+    if (typeof __APP_NAME__ !== "undefined") {
+      return __APP_NAME__;
+    }
+    return "default";
+  },
+});
 
 const showUpdatePrompt = ref(false);
 const initialValidator = ref<string | null>(null);
@@ -34,7 +48,9 @@ const isLeader = ref(false);
 const leaderElectionTimeout = ref<number | null>(null);
 
 const CHECK_INTERVAL_MS = 60000; // Check every 60 seconds
-const CHANNEL_NAME = "version-monitor";
+const CHANNEL_NAME = computed(
+  () => `version-monitor-${props.appName}`,
+);
 const LEADER_ELECTION_TIMEOUT_MS = 100;
 
 /**
@@ -162,7 +178,7 @@ function initializeBroadcastChannel(): void {
     return;
   }
 
-  broadcastChannel.value = new BroadcastChannel(CHANNEL_NAME);
+  broadcastChannel.value = new BroadcastChannel(CHANNEL_NAME.value);
   broadcastChannel.value.addEventListener("message", handleMessage);
 
   // Simple leader election: ask if there's already a leader

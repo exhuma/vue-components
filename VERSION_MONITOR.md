@@ -38,11 +38,12 @@ import VersionMonitor from "@shared-components/VersionMonitor.vue";
 
 ## Props
 
-| Prop               | Type     | Default                        | Description                                              |
-| ------------------ | -------- | ------------------------------ | -------------------------------------------------------- |
-| `checkIntervalMs`  | `number` | `300000` (5 minutes)           | How often to check for version updates (in milliseconds) |
-| `message`          | `string` | `"A new version is available"` | The message shown in the notification                    |
-| `reloadButtonText` | `string` | `"Reload"`                     | The text on the reload button                            |
+| Prop               | Type     | Default                        | Description                                                                |
+| ------------------ | -------- | ------------------------------ | -------------------------------------------------------------------------- |
+| `appName`          | `string` | (from `__APP_NAME__`)          | Unique identifier for the app (prevents conflicts when multiple apps open) |
+| `checkIntervalMs`  | `number` | `300000` (5 minutes)           | How often to check for version updates (in milliseconds)                   |
+| `message`          | `string` | `"A new version is available"` | The message shown in the notification                                      |
+| `reloadButtonText` | `string` | `"Reload"`                     | The text on the reload button                                              |
 
 ## Examples
 
@@ -65,7 +66,7 @@ import VersionMonitor from "@shared-components/VersionMonitor.vue";
 
 ### 1. Vite Configuration
 
-The Vite config must include the version generation plugin (already configured in both admin and public apps):
+The Vite config must include the app name definition (already configured in both admin and public apps):
 
 ```typescript
 import { readFileSync } from "node:fs";
@@ -79,18 +80,21 @@ const version = packageJson.version;
 export default defineConfig({
   plugins: [
     vue(),
-    {
-      name: "generate-version-file",
-      closeBundle() {
-        const fs = require("fs");
-        const path = require("path");
-        const distPath = path.resolve(__dirname, "dist");
-        const versionFile = path.join(distPath, "version.json");
-        fs.writeFileSync(versionFile, JSON.stringify({ version }, null, 2));
-      },
-    },
   ],
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __APP_NAME__: JSON.stringify("admin"), // or "public", etc.
+  },
 });
+```
+
+Make sure to also declare the constant in your `env.d.ts`:
+
+```typescript
+/// <reference types="vite/client" />
+
+declare const __APP_VERSION__: string;
+declare const __APP_NAME__: string;
 ```
 
 ### 2. Nginx Configuration
@@ -113,6 +117,9 @@ location = /version.json {
 - Stops checking once a version mismatch is detected
 - Gracefully handles fetch failures (logs warning but doesn't show notification)
 - Automatically cleans up interval on component unmount
+- Uses BroadcastChannel API with app-specific channel names to coordinate between tabs
+- Only one tab per application performs version checks (leader election), preventing redundant network requests
+- The `appName` prop ensures that multiple applications (admin, public, etc.) can run simultaneously without conflicts
 
 ## Browser Compatibility
 
@@ -120,5 +127,6 @@ Compatible with all modern browsers that support:
 
 - ES6 async/await
 - Fetch API
+- BroadcastChannel API (optional, falls back to single-tab checking)
 - Vue 3
 - Vuetify 3
