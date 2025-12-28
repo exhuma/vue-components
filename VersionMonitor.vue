@@ -6,15 +6,20 @@
     location="top"
     multi-line
   >
-    <div class="d-flex flex-column">
-      <span class="mb-2">A new version of the application is available.</span>
-      <div class="d-flex gap-2">
+    <v-card color="primary" variant="flat">
+      <v-card-title>Update Available</v-card-title>
+      <v-card-text>
+        A new version of the application is available. Please reload to get the
+        latest features and fixes.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
         <v-btn variant="elevated" color="white" @click="handleReload">
           Reload Now
         </v-btn>
         <v-btn variant="text" @click="handleDismiss"> Dismiss </v-btn>
-      </div>
-    </div>
+      </v-card-actions>
+    </v-card>
   </v-snackbar>
 </template>
 
