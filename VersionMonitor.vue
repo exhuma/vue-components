@@ -48,9 +48,7 @@ const isLeader = ref(false);
 const leaderElectionTimeout = ref<number | null>(null);
 
 const CHECK_INTERVAL_MS = 60000; // Check every 60 seconds
-const CHANNEL_NAME = computed(
-  () => `version-monitor-${props.appName}`,
-);
+const CHANNEL_NAME = computed(() => `version-monitor-${props.appName}`);
 const LEADER_ELECTION_TIMEOUT_MS = 100;
 
 /**
