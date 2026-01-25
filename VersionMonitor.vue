@@ -78,6 +78,11 @@ async function checkForUpdate(): Promise<boolean> {
     return false;
   }
 
+  if (import.meta.env.DEV) {
+    // Disable check in development mode
+    return false;
+  }
+
   try {
     const response = await fetch("/index.html", {
       method: "HEAD",
